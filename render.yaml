@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: braille-assistive-app-iitbhu
+    env: docker
+    repo: https://github.com/asad8210/braille-recognition.git
+    branch: main
+    plan: free
+    region: oregon
+    healthCheckPath: /
+    dockerfilePath: Dockerfile
+    autoDeploy: true
