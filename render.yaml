@@ -2,7 +2,7 @@ services:
   - type: web
     name: braille-assistive-app-iitbhu
     env: docker
-    repo: https://github.com/asad8210/braille-recognition.git
+    repo: https://github.com/asad8210/imagetextassistivereader.git
     branch: main
     plan: free
     region: oregon
