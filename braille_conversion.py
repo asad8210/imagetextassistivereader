@@ -5,8 +5,8 @@ import time
 import re
 from typing import Dict, Optional
 from gtts import gTTS
-from gtts import gTTSError
-from playsound import PlaysoundException
+from gtts.lang import gTTSError
+from playsound import playsound, PlaysoundException
 
 # Configure logging
 logging.basicConfig(
@@ -17,11 +17,11 @@ logging.basicConfig(
 
 # English Braille map (Grade 1)
 english_braille_map: Dict[str, str] = {
-    'a': '⠁', 'b": "⠃', "c": ", "d": ", 'e': '⠑',
-    'f': '⠋', 'g': '⠛', 'h': '⠓', 'i': '⠊', 'j': 'a',
-    'k': '⠅', 'l': '⠇', 'm': '⠍', 'n": '⠝', 'o": '⠕',
+    'a': '⠁', 'b': '⠃', 'c': '⠉', 'd': '⠙', 'e': '⠑',
+    'f': '⠋', 'g': '⠛', 'h': '⠓', 'i': '⠊', 'j': '⠚',
+    'k': '⠅', 'l': '⠇', 'm': '⠍', 'n': '⠝', 'o': '⠕',
     'p': '⠏', 'q': '⠟', 'r': '⠗', 's': '⠎', 't': '⠞',
-    'u": '⠥', 'v': '⠧', 'w': '⠺', 'x': '⠭', 'y': '⠽', 'z': '⠵',
+    'u': '⠥', 'v': '⠧', 'w': '⠺', 'x': '⠭', 'y': '⠽', 'z': '⠵',
     'A': '⠁', 'B': '⠃', 'C': '⠉', 'D': '⠙', 'E': '⠑',
     'F': '⠋', 'G': '⠛', 'H': '⠓', 'I': '⠊', 'J': '⠚',
     'K': '⠅', 'L': '⠇', 'M': '⠍', 'N': '⠝', 'O': '⠕',
@@ -96,7 +96,7 @@ def convert_to_braille(text: str, language: Optional[str] = None) -> str:
 
     # Determine language
     lang = language if language in ['en', 'hi'] else detect_language(text)
-    braille_map = hindi_braille_map if lang == 'hi' else language_braille_map
+    braille_map = hindi_braille_map if lang == 'hi' else english_braille_map
     prefix = "Hindi: " if lang == 'hi' else "English: "
 
     # Convert prefix to Braille
@@ -117,7 +117,7 @@ def convert_to_braille(text: str, language: Optional[str] = None) -> str:
             result.append(braille_map.get(char, '⠿'))
 
     braille_text = prefix_braille + ' ' + ''.join(result)
-    logging.info(f"Converted '{text}' to Braille (Language: {lang}): {braille_text}")
+    logging.debug(f"Converted '{text}' to Braille ({lang}): {braille_text}")
     return braille_text
 
 def _generate_and_play_audio(text: str, lang: str, filename: str) -> None:
@@ -149,7 +149,7 @@ def _generate_and_play_audio(text: str, lang: str, filename: str) -> None:
             except OSError as e:
                 logging.warning(f"Failed to remove {filename} (attempt {attempt + 1}): {e}")
                 if attempt < max_retries - 1:
-                    time.sleep(0.1)
+                    time.sleep(0.5)
                 else:
                     logging.error(f"Could not remove {filename} after {max_retries} attempts")
 
@@ -184,7 +184,7 @@ def speak(text: str, lang: str = 'hi') -> None:
         _generate_and_play_audio(text, lang, filename)
 
     except Exception as e:
-        logging.error(f"Failed to speak text: {e}")
+        logging.error(f"Failed to speak: {e}")
 
 def speak_english(text: str) -> None:
     """
@@ -203,7 +203,7 @@ def speak_english(text: str) -> None:
 
         # Generate unique filename
         filename = os.path.join(audio_dir, f"{uuid.uuid4()}.mp3")
-        _generate_and_play_audio(text, lang='en', filename=filename)
+        _generate_and_play_audio(text, lang='en', filename)
 
     except Exception as e:
         logging.error(f"Failed to speak English text: {e}")
@@ -213,13 +213,13 @@ if __name__ == "__main__":
     texts = [
         ("Hello, world!", 'en"),
         ("नमस्ते, दुनिया!", 'hi'),
-        ("123", 'en'),
+        ("123", None),
         ("१२३", 'hi')
     ]
-    for text, lang_code in texts:
-        braille = convert_to_braille(text, lang_code)
-        print(f"Text: '{text}', Language: {lang_code or 'auto'}, Braille: {braille}")
-        if lang_code == 'en':
+    for text, lang in texts:
+        braille = convert_to_braille(text, lang)
+        print(f"Text: {text}, Language: {lang or 'auto'}, Braille: {braille}")
+        if lang == 'en':
             speak_english(text)
         else:
-            speak(text, lang_code or detect_language(text))
+            speak(text, lang or detect_language(text))
