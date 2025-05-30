@@ -211,15 +211,15 @@ def speak_english(text: str) -> None:
 if __name__ == "__main__":
     # Example usage
     texts = [
-        ("Hello, world!", 'en"),
-        ("नमस्ते, दुनिया!", 'hi'),
-        ("123", None),
-        ("१२३", 'hi')
+        ("Hello, world!", "en"),
+        ("नमस्ते, दुनिया!", "hi"),
+        ("123", "en"),
+        ("१२३", "hi"),
     ]
     for text, lang in texts:
         braille = convert_to_braille(text, lang)
-        print(f"Text: {text}, Language: {lang or 'auto'}, Braille: {braille}")
-        if lang == 'en':
+        print(f"Text: '{text}', Language: {lang or 'auto'}, Braille: {braille}")
+        if lang == "en":
             speak_english(text)
         else:
             speak(text, lang or detect_language(text))
